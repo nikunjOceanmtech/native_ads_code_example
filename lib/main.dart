@@ -37,7 +37,7 @@ class NativeInlinePage extends StatefulWidget {
 class _NativeInlinePageState extends State<NativeInlinePage> {
   NativeAd? _ad;
   bool isCheck = false;
-  List list = [];
+  List<NativeAd?> list = [];
 
   @override
   void initState() {
@@ -46,30 +46,27 @@ class _NativeInlinePageState extends State<NativeInlinePage> {
   }
 
   void getData() {
-    // getNativeAd();
-    // _ad = getNativeAd();
+    _ad = getNativeAd();
     list.clear();
-    for (int i = 1; i <= 52; i++) {
+    for (int i = 1; i <= 30; i++) {
       if (i % 5 == 0) {
-        // NativeAd ads = getNativeAd();
-        BannerAd ads = getBannerAd();
-        list.add(AdWidget(ad: ads));
+        getNativeAd();
       } else {
-        list.add(Container(height: 60, color: const Color.fromARGB(255, 60, 4, 0)));
+        list.add(null);
       }
     }
   }
 
   NativeAd getNativeAd() {
-    print("=======$nativeAdUnitId");
     return NativeAd(
       adUnitId: nativeAdUnitId,
       request: const AdRequest(),
       listener: NativeAdListener(
         onAdLoaded: (ad) {
+          print("=======Ad Load Success ${ad.adUnitId}");
           setState(() {
-            isCheck = true;
-            _ad = ad as NativeAd;
+            list.add(ad as NativeAd);
+            // _ad = ad as NativeAd;
           });
         },
         onAdFailedToLoad: (ad, error) {
@@ -77,7 +74,7 @@ class _NativeInlinePageState extends State<NativeInlinePage> {
           ad.dispose();
         },
       ),
-      nativeTemplateStyle: NativeTemplateStyle(templateType: TemplateType.small),
+      factoryId: 'listTile',
     )..load();
   }
 
@@ -122,6 +119,7 @@ class _NativeInlinePageState extends State<NativeInlinePage> {
     return Scaffold(
       appBar: AppBar(
         surfaceTintColor: Colors.white,
+        backgroundColor: Colors.white,
         title: const Text('AdMob Native Inline Ad'),
       ),
       body: listView(),
@@ -134,10 +132,11 @@ class _NativeInlinePageState extends State<NativeInlinePage> {
         children: List.generate(
           list.length,
           (int index) {
+            print("========${list[index]}");
             return Container(
               height: 72.0,
               alignment: Alignment.center,
-              child: list[index],
+              child: list[index] != null ? AdWidget(ad: list[index]!) : Text("=======${index + 1}"),
             );
           },
         ),
