@@ -94,7 +94,7 @@ class _NativeInlinePageState extends State<NativeInlinePage> {
                     // return const SizedBox.shrink();
                     return AnimatedOpacity(
                       opacity: isCheck ? 1 : 0,
-                      duration: const Duration(seconds: 1),
+                      duration: const Duration(milliseconds: 500),
                       curve: Curves.easeIn,
                       child: Container(
                         height: 100,
