@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:bloc/bloc.dart';
@@ -8,25 +9,26 @@ import 'package:test_ads_pratice/global.dart';
 class AdsShowCubit extends Cubit<double> {
   AdsShowCubit() : super(0);
 
-  List<NativeAd?> list = [];
+  Map<int, NativeAd> mapOfNativeAd = {};
 
-  Future<void> getData() async {
-    list.clear();
-    for (int i = 0; i < 30; i++) {
-      await getNativeAd();
+  Future<NativeAd?> getNativeAd1({required int index}) async {
+    Completer<NativeAd> completer = Completer<NativeAd>();
+
+    if (mapOfNativeAd.containsKey(index)) {
+      return mapOfNativeAd[index];
     }
-  }
-
-  Future<NativeAd> getNativeAd() async {
-    NativeAd ads = NativeAd(
+    NativeAd? nativeAd;
+    nativeAd = NativeAd(
       adUnitId: nativeAdUnitId,
       request: const AdRequest(),
       listener: NativeAdListener(
         onAdLoaded: (ad) {
-          list.add(ad as NativeAd);
-          emit(Random().nextDouble());
+          nativeAd = ad as NativeAd;
+          completer.complete(ad);
+          mapOfNativeAd.addAll({index: ad});
         },
         onAdFailedToLoad: (ad, error) {
+          completer.completeError(error);
           debugPrint('======Ad load failed $error');
           ad.dispose();
         },
@@ -34,48 +36,11 @@ class AdsShowCubit extends Cubit<double> {
       // factoryId: 'listTile',
       nativeTemplateStyle: NativeTemplateStyle(templateType: TemplateType.small),
     );
-    await ads.load();
-    return ads;
-  }
-
-  BannerAd getBannerAd() {
-    return BannerAd(
-      adUnitId: bannerAdUnitId,
-      request: const AdRequest(
-        keywords: <String>['foo', 'bar'],
-        contentUrl: 'http://foo.com/bar.html',
-        nonPersonalizedAds: true,
-      ),
-      listener: BannerAdListener(
-        onAdLoaded: (ad) {},
-        onAdFailedToLoad: (ad, error) async {
-          debugPrint('======Ad load failed $error');
-          await ad.dispose();
-        },
-      ),
-      size: AdSize.banner,
-    )..load();
-  }
-
-  void getIntiticalAd() {
-    InterstitialAd.load(
-      adUnitId: interstitialAdUnitId,
-      request: const AdRequest(
-        keywords: <String>['foo', 'bar'],
-        contentUrl: 'http://foo.com/bar.html',
-        nonPersonalizedAds: true,
-      ),
-      adLoadCallback: InterstitialAdLoadCallback(
-        onAdLoaded: (ad) {
-          ad.show();
-        },
-        onAdFailedToLoad: (error) {},
-      ),
-    );
+    await nativeAd?.load();
+    return completer.future;
   }
 
   String value = "";
-
   void changeValue({required String clickedValue}) {
     value = clickedValue;
     emit(Random().nextDouble());
