@@ -31,7 +31,8 @@ class AdsShowCubit extends Cubit<double> {
           ad.dispose();
         },
       ),
-      factoryId: 'listTile',
+      // factoryId: 'listTile',
+      nativeTemplateStyle: NativeTemplateStyle(templateType: TemplateType.small),
     );
     await ads.load();
     return ads;
