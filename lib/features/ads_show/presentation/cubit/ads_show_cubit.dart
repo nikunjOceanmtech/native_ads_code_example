@@ -15,8 +15,7 @@ class AdsShowCubit extends Cubit<double> {
     Completer<NativeAd> completer = Completer<NativeAd>();
 
     if (mapOfNativeAd.containsKey(index)) {
-      completer.complete(mapOfNativeAd[index]);
-      return completer.future;
+      return mapOfNativeAd[index];
     }
     NativeAd? nativeAd;
     nativeAd = NativeAd(

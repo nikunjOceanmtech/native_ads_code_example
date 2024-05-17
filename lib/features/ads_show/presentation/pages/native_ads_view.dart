@@ -70,23 +70,38 @@ class _NativeInlinePageState extends State<NativeInlinePage> {
                 return FutureBuilder(
                   future: adsShowCubit.getNativeAd1(index: index),
                   builder: (context, snapshot) {
-                    if (snapshot.data != null && snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
-                      return Container(
-                        height: 72.0,
-                        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                        alignment: Alignment.center,
-                        child: AdWidget(ad: snapshot.data!),
-                      );
-                    } else if (snapshot.hasError) {
-                      return Container(
-                        height: 72.0,
-                        color: Colors.amber,
-                        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                        alignment: Alignment.center,
-                        child: Text("======${snapshot.error}"),
-                      );
+                    if (snapshot.hasError) {
+                      return const SizedBox.shrink();
                     }
-                    return const SizedBox.shrink();
+                    bool isCheck =
+                        snapshot.data != null && snapshot.hasData && snapshot.connectionState == ConnectionState.done;
+                    // if (snapshot.data != null && snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
+                    //   return Container(
+                    //     height: 72.0,
+                    //     margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                    //     alignment: Alignment.center,
+                    //     child: AdWidget(ad: snapshot.data!),
+                    //   );
+                    // } else if (snapshot.hasError) {
+                    //   return Container(
+                    //     height: 72.0,
+                    //     color: Colors.amber,
+                    //     margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                    //     alignment: Alignment.center,
+                    //     child: Text("======${snapshot.error}"),
+                    //   );
+                    // }
+                    // return const SizedBox.shrink();
+                    return AnimatedOpacity(
+                      opacity: isCheck ? 1 : 0,
+                      duration: const Duration(seconds: 1),
+                      curve: Curves.easeIn,
+                      child: Container(
+                        height: 100,
+                        alignment: Alignment.center,
+                        child: isCheck ? AdWidget(ad: snapshot.data!) : const SizedBox.shrink(),
+                      ),
+                    );
                   },
                 );
               }
