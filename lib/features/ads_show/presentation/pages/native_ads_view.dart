@@ -17,7 +17,6 @@ class _NativeInlinePageState extends State<NativeInlinePage> {
   @override
   void initState() {
     adsShowCubit = getItInstance<AdsShowCubit>();
-    adsShowCubit.getData();
     super.initState();
   }
 
@@ -34,76 +33,70 @@ class _NativeInlinePageState extends State<NativeInlinePage> {
   }
 
   Widget listView() {
-    return 1 == 1
-        ? BlocBuilder<AdsShowCubit, double>(
-            bloc: adsShowCubit,
-            builder: (context, state) {
-              return Column(
-                children: [
-                  Container(
-                    height: 150,
-                    width: double.infinity,
-                    alignment: Alignment.center,
-                    child: Text(adsShowCubit.value),
-                  ),
-                  Expanded(
-                    child: ListView.separated(
-                      itemBuilder: (context, index) {
-                        if (index % 3 == 0) {
-                          return const SizedBox.shrink();
-                        }
-                        return InkWell(
-                          onTap: () {
-                            adsShowCubit.changeValue(clickedValue: "=======$index");
-                          },
-                          child: Container(
-                            height: 72.0,
-                            color: Colors.amber,
-                            margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                            alignment: Alignment.center,
-                            child: Text("=======$index"),
-                          ),
-                        );
-                      },
-                      separatorBuilder: (context, index) {
-                        if (index % 3 == 0) {
-                          return adsShowCubit.list[index] != null
-                              ? Container(
-                                  height: 72.0,
-                                  color: Colors.amber,
-                                  margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                                  alignment: Alignment.center,
-                                  child: AdWidget(ad: adsShowCubit.list[index]!),
-                                )
-                              : const SizedBox.shrink();
-                        }
-                        return const SizedBox.shrink();
-                      },
-                      itemCount: adsShowCubit.list.length,
-                    ),
-                  ),
-                ],
+    return Column(
+      children: [
+        BlocBuilder<AdsShowCubit, double>(
+          bloc: adsShowCubit,
+          builder: (context, state) {
+            return Container(
+              height: 150,
+              width: double.infinity,
+              alignment: Alignment.center,
+              child: Text(adsShowCubit.value),
+            );
+          },
+        ),
+        Expanded(
+          child: ListView.separated(
+            itemBuilder: (context, index) {
+              if (index % 3 == 0) {
+                return const SizedBox.shrink();
+              }
+              return InkWell(
+                onTap: () {
+                  adsShowCubit.changeValue(clickedValue: "=======$index");
+                },
+                child: Container(
+                  height: 72.0,
+                  color: Colors.amber,
+                  margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                  alignment: Alignment.center,
+                  child: Text("=======$index"),
+                ),
               );
             },
-          )
-        : SingleChildScrollView(
-            child: Column(
-              children: List.generate(
-                adsShowCubit.list.length,
-                (int index) {
-                  return Container(
-                    height: 72.0,
-                    alignment: Alignment.center,
-                    child: index % 3 == 0
-                        ? adsShowCubit.list[index] != null
-                            ? AdWidget(ad: adsShowCubit.list[index]!)
-                            : const SizedBox.shrink()
-                        : Text("=======${index + 1}"),
-                  );
-                },
-              ),
-            ),
-          );
+            separatorBuilder: (context, index) {
+              if (index % 3 == 0) {
+                return FutureBuilder(
+                  future: adsShowCubit.getNativeAd1(index: index),
+                  builder: (context, snapshot) {
+                    if (snapshot.data != null && snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
+                      return Container(
+                        height: 72.0,
+                        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                        alignment: Alignment.center,
+                        child: AdWidget(ad: snapshot.data!),
+                      );
+                    } else if (snapshot.hasError) {
+                      return Container(
+                        height: 72.0,
+                        color: Colors.amber,
+                        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                        alignment: Alignment.center,
+                        child: Text("======${snapshot.error}"),
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  },
+                );
+              }
+              return const SizedBox.shrink();
+            },
+            itemCount: 1 == 1 ? 50 : adsShowCubit.mapOfNativeAd.length,
+          ),
+        ),
+      ],
+    );
   }
 
   @override
